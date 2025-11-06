@@ -2,22 +2,35 @@ Add file → Create new file
 app.py
 import streamlit as st
 import pandas as pd
+import os
 
 st.set_page_config(page_title="Dry Gas CSV Tool", layout="wide")
 st.title("💨 Dry Gas Testing CSV Comparator & Validator")
 
-master = st.file_uploader("📂 Upload Master CSV", type=["csv"])
+# 🔹 Try to load built-in master CSV if available
+default_master_path = "TestData53684.csv"
+if os.path.exists(default_master_path):
+    master_df = pd.read_csv(default_master_path)
+    st.success("✅ Default master CSV loaded successfully!")
+else:
+    master_df = pd.DataFrame()
+    st.info("No default master CSV found — please upload one manually.")
+
+# 🔹 Upload new master or test CSV
+uploaded_master = st.file_uploader("📂 Upload New Master CSV (optional)", type=["csv"])
 test = st.file_uploader("📂 Upload Test CSV", type=["csv"])
 
-if master:
-    master_df = pd.read_csv(master)
+if uploaded_master is not None:
+    master_df = pd.read_csv(uploaded_master)
+
+if not master_df.empty:
     st.subheader("🧾 Master CSV (Editable)")
     edited = st.data_editor(master_df, num_rows="dynamic", use_container_width=True)
     st.download_button("💾 Download Updated Master CSV", edited.to_csv(index=False), "master_updated.csv")
 else:
-    st.info("👈 Upload master CSV to begin")
+    st.warning("👈 Upload or provide a master CSV to begin.")
 
-if master and test:
+if test is not None and not master_df.empty:
     st.subheader("🔍 Comparison Results")
     test_df = pd.read_csv(test)
     diffs = []
@@ -37,10 +50,11 @@ if master and test:
     else:
         st.success("✅ No differences found!")
 
-if master:
+# 🔹 Validation checks
+if not master_df.empty:
     st.subheader("🧪 Validation")
     issues = []
-    for i, row in edited.iterrows():
+    for i, row in master_df.iterrows():
         if "DriveTorque" in row and (row["DriveTorque"] < -1 or row["DriveTorque"] > 1):
             issues.append({"Row": i, "Column": "DriveTorque", "Value": row["DriveTorque"], "Issue": "Out of range (-1 to 1)"})
         if "DriveSpeed" in row and row["DriveSpeed"] < 0:
