@@ -1,1 +1,2 @@
-
+TST_SpeedDem;TST_CellPresDemand;TST_InterPresDemand;TST_InterBPDemand_DE;TST_InterBPDemand_NDE;TST_GasInjectionDemand;TST_StepDuration;TST_APFlag;TST_TempDemand;TST_GasType;TST_TestMode;TST_MeasurementReq;TST_TorqueCheck
+0;0;0;0;0;0;0;0;0;Air;0;0;0
